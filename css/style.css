@@ -15,8 +15,8 @@ main {
     display: flex;
     justify-content: center;
     background-color: transparent;
-    width: 500px;
-    height: 350px;
+    width: 45%;
+    height: 60%;
     perspective: 1000px;
 }
 
@@ -62,4 +62,9 @@ figure, .flip-card-back {
 
 p {
     margin: 0;
+}
+
+img {
+    height: 100%;
+    width: 100%;
 }
