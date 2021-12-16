@@ -6,88 +6,100 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vinterkort</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-    <style>
-        html {
-            height: 100%;
-            font-family: 'Roboto', sans-serif;
-        }
-
-        body {
-            margin: 0;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        main {
-            display: flex;
-            justify-content: center;
-            background-color: transparent;
-            width: 45%;
-            height: 60%;
-            perspective: 1000px;
-        }
-
-        .flip-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.8s;
-            transform-style: preserve-3d;
-        }
-
-        main:hover .flip-card-inner {
-            transform: rotateY(180deg);
-        }
-
-        figure {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid black;
-        }
-
-        figure,
-        .flip-card-back {
-            margin: 0;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-        }
-
-        .flip-card-back {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: white;
-            color: black;
-            transform: rotateY(180deg);
-            border: 2px solid black;
-        }
-
-        p {
-            margin: 0;
-        }
-
-        img {
-            height: 100%;
-            width: 100%;
-        }
-    </style>
 </head>
 
 <body>
     <main>
         <div class="flip-card-inner">
+            <canvas id="snow"></canvas>
+        <script>
+            const canvas = document.querySelector('#snow');
+            const ctx = canvas.getContext('2d');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            let start = null;
+
+            let particles = [];
+            const PI_2 = 2 * Math.PI;
+
+            function randomInt(min, max) {
+                return Math.floor(Math.random() * (max - min)) + min;
+            }
+
+            window.onresize = () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            };
+            // window.onscroll = () => {
+            //     canvas.setAttribute(
+            //         'style',
+            //         'top: ' + window.pageYOffset + 'px'
+            //     );
+            // };
+
+            function step(timestamp) {
+                ctx.clearRect(0, 0, width, height);
+                if (!start) start = timestamp;
+                let progress = timestamp - start;
+
+                particles.forEach((element, index) => {
+                    if (element.y > (height - 2) || element.x > width || element.x < 0) {
+                        particles.splice(index, 1);
+                    }
+                    element.draw();
+                });
+
+                spawnParticles(randomInt(0, 3));
+
+                window.requestAnimationFrame(step);
+            }
+
+            window.requestAnimationFrame(step);
+
+            const Particle = function (x, y, color) {
+                let particle = {};
+                particle.x = x;
+                particle.y = y;
+                particle.dy = randomInt(1, 5);
+                particle.dx = Math.random() > 0.5 ? - Math.random() * 2 : Math.random() * 2;
+                particle.color = color;
+                particle.size = 2 + Math.floor(Math.random() * 2);
+                particle.draw = function () {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, PI_2, false);
+
+                    ctx.fillStyle = this.color;
+
+                    ctx.fill();
+                    particle.update();
+                };
+                particle.update = function () {
+                    this.y += this.dy / 4;
+                    this.x += this.dx / 4;
+                };
+
+                return particle;
+            };
+
+            function spawnParticles(amount) {
+                for (let i = 0; i < amount; i++) {
+                    particles.push(
+                        Particle(
+                            randomInt(0, width),
+                            0,
+                            `rgba(255, 255, 255, ${Math.random()}`
+                        )
+                    );
+                }
+            }
+        </script>
             <figure>
                 <img src="https://picsum.photos/500/375" alt="">
             </figure>
